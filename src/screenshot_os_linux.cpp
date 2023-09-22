@@ -1,8 +1,11 @@
 #include "screenshot.h"
 
 namespace cps {
-bool GetScreenshotBitmap(unsigned char **screenshot, size_t *width, size_t *height) {
+bool GetScreenshotImageByteData(unsigned char **image_bytes,
+                                size_t *width,
+                                size_t *height,
+                                size_t *bytes_len,
+                                bool compress) {
   // todo
-  return false;
 }
 }
