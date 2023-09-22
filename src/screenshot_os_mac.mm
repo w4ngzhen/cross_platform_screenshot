@@ -37,8 +37,8 @@ bool GetCGImageByteData(CGImageRef cg_image, size_t *width, size_t *height, uint
   *height = CGImageGetHeight(cg_image);
   NSBitmapImageRep *bitmap_rep = [[NSBitmapImageRep alloc] initWithCGImage:cg_image];
   NSImage *ns_image = [[NSImage alloc] init];
-  [cg_image addRepresentation:bitmap_rep];
-  NSData *image_data = [cg_image TIFFRepresentation];
+  [ns_image addRepresentation:bitmap_rep];
+  NSData *image_data = [ns_image TIFFRepresentation];
   *bitmap = (uint8_t *) image_data.bytes;
   return true;
 }
