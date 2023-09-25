@@ -16,9 +16,7 @@ elseif (APPLE)
   set(CMAKE_EXE_LINKER_FLAGS "-framework Cocoa -framework AppKit -framework CoreData -framework Foundation -framework ImageIO")
 elseif (UNIX)
   message(STATUS "Compile unix/linux X11 lib.")
-  set(PLATFORM_SRC_FILES "src/screenshot_os_linux.cpp"
-      src/screenshot_os_linux.cpp
-      src/screenshot_os_win.cpp)
+  set(PLATFORM_SRC_FILES "src/screenshot_os_linux.cpp")
 else ()
   message(FATAL_ERROR "Unsupported platform.")
 endif ()

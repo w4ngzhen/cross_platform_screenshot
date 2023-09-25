@@ -2,10 +2,9 @@
 
 namespace cps {
 bool GetScreenshotImageByteData(unsigned char **image_bytes,
-                                size_t *width,
-                                size_t *height,
-                                size_t *bytes_len,
-                                bool compress) {
+                                unsigned int *width,
+                                unsigned int *height,
+                                unsigned int *bytes_len) {
   // todo
 }
 }
