@@ -9,23 +9,15 @@
 CGImageRef GetMouseScreenImage() {
   // get the mouse location.
   auto mouse_location = [NSEvent mouseLocation];
-  id screenId;
-  // find the screen where mouse located.
-  for (id screen in [NSScreen screens]) {
-    if (NSMouseInRect(mouse_location, [screen frame], NO)) {
-      screenId = screen;
-      break;
-    }
-  }
-  if (!screenId) {
+  // get the Display by mouse location.
+  CGDirectDisplayID displayId;
+  uint32_t match_count;
+  auto err = CGGetDisplaysWithPoint(mouse_location, 1, &displayId, &match_count);
+  if (err != kCGErrorSuccess || match_count <= 0) {
     return nullptr;
   }
-  auto screen_rect = [screenId frame];
-  CGImageRef img = CGWindowListCreateImage(
-      screen_rect,
-      kCGWindowListOptionAll,
-      kCGNullWindowID,
-      kCGWindowImageBoundsIgnoreFraming);
+  // create image from the display.
+  CGImageRef img = CGDisplayCreateImage(displayId);
   return img;
 }
 
