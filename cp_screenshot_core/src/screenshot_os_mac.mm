@@ -4,7 +4,7 @@
 #import <AppKit/NSBitmapImageRep.h>
 #import <AppKit/NSImage.h>
 #import <AppKit/NSScreen.h>
-#include "screenshot.h"
+#include "cp_screenshot/cp_screenshot.h"
 
 CGImageRef GetMouseScreenImage() {
   // get the mouse location.
