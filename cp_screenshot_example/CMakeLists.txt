@@ -18,7 +18,7 @@ add_executable(
 
 add_dependencies(
     cp_screenshot_example
-    cp_screenshot
+    cp_screenshot_core
 )
 
 target_include_directories(
@@ -31,5 +31,5 @@ target_include_directories(
 target_link_libraries(
     cp_screenshot_example
     PRIVATE
-    cp_screenshot
+    cp_screenshot_core
 )

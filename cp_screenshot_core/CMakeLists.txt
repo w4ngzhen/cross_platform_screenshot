@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(cp_screenshot CXX)
+project(cp_screenshot_core CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -26,8 +26,8 @@ endif ()
 
 # library target
 add_library(
-    cp_screenshot
+    cp_screenshot_core
     ${SOURCE_FILES}
 )
 
-target_include_directories(cp_screenshot PUBLIC include)
+target_include_directories(cp_screenshot_core PUBLIC include)
