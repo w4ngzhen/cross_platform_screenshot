@@ -106,12 +106,12 @@ bool GetScreenshotImageByteData(unsigned char** image_bytes,
   bih.biSizeImage = bmp_monitor.bmHeight * bmp_monitor.bmWidthBytes;
 
   // get bmp raw byte data
-  char* bmp_data_buff = new char[bih.biSizeImage];
+  auto* bmp_rgb_buff = new unsigned char[bih.biSizeImage];
   GetDIBits(hdc_mem_monitor,
             hbitmap_monitor,
             0L,
             bmp_monitor.bmHeight,
-            bmp_data_buff,
+            bmp_rgb_buff,
             reinterpret_cast<LPBITMAPINFO>(&bih),
             (DWORD)DIB_RGB_COLORS);
 
@@ -121,12 +121,22 @@ bool GetScreenshotImageByteData(unsigned char** image_bytes,
   bfh.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + bih.biSizeImage;
   bfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 
-  HANDLE hFile = CreateFile("test.bmp", GENERIC_WRITE, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-  DWORD dwWrite;
-  WriteFile(hFile, &bfh, sizeof(BITMAPFILEHEADER), &dwWrite, nullptr);
-  WriteFile(hFile, &bih, sizeof(BITMAPINFOHEADER), &dwWrite, nullptr);
-  WriteFile(hFile, bmp_data_buff, bih.biSizeImage, &dwWrite, nullptr);
-  CloseHandle(hFile);
+  // BMP completely data (file header + info header + image data)
+  auto* bmp_bytes = new unsigned char[bfh.bfSize];
+  auto pos = bmp_bytes;
+  memcpy(pos, &bfh, sizeof(BITMAPFILEHEADER));
+  pos += sizeof(BITMAPFILEHEADER);
+  memcpy(pos, &bih, sizeof(BITMAPINFOHEADER));
+  pos += sizeof(BITMAPINFOHEADER);
+  memcpy(pos, bmp_rgb_buff, bih.biSizeImage);
+
+  // === test ===
+  // HANDLE hFile1 = CreateFile("test1.bmp", GENERIC_WRITE, 0, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+  // DWORD dwWrite1;
+  // WriteFile(hFile1, bmp_bytes, bfh.bfSize, &dwWrite1, nullptr);
+  // CloseHandle(hFile1);
+  // === test ===
+
   // clean up all
   ReleaseDC(hwnd_entire_desktop, hdc_entire_desktop);
   SelectObject(hdc_mem_monitor, null_bitmap);
