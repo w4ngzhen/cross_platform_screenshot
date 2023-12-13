@@ -1,6 +1,5 @@
 #include <windows.h>
 #include <vector>
-#include <sstream>
 #include "cp_screenshot/cp_screenshot.h"
 #include <gdiplus.h>
 #pragma comment(lib, "gdiplus")
@@ -94,27 +93,30 @@ static SIZE GetMonitorResolution(HMONITOR hMonitor) {
   return size;
 }
 
-static bool GetBytesFromStream(IStream *stream, unsigned char **output_bytes, unsigned int *bytes_len) {
-  ULARGE_INTEGER ulnSize;
-  LARGE_INTEGER lnOffset;
-  lnOffset.QuadPart = 0;
-  /* get the stream bytes_len */
-  if (stream->Seek(lnOffset, STREAM_SEEK_END, &ulnSize) != S_OK) {
-    return false;
-  }
-  if (stream->Seek(lnOffset, STREAM_SEEK_SET, nullptr) != S_OK) {
-    return false;
-  }
-
-  /* read it */
-  *output_bytes = new unsigned char[((size_t) ulnSize.QuadPart)];
-  *bytes_len = (size_t) ulnSize.QuadPart;
-  ULONG bytesRead;
-  if (stream->Read(*output_bytes, (ULONG) ulnSize.QuadPart, &bytesRead) != S_OK) {
-    delete *output_bytes;
+/**
+ * get bytes data from IStream.
+ * @param stream
+ * @param output_bytes
+ * @param size
+ * @return
+ */
+static bool GetBytesFromStream(IStream *stream, unsigned char **output_bytes, unsigned int *size) {
+  HGLOBAL h_mem = nullptr;
+  if (GetHGlobalFromStream(stream, &h_mem) != S_OK) {
     return false;
   }
 
+  void *global_data = GlobalLock(h_mem);
+  auto data_size = GlobalSize(h_mem);
+
+  // allocated heap data and copy data.
+  auto heap_data = new unsigned char[data_size];
+  memcpy(heap_data, global_data, data_size);
+
+  GlobalUnlock(h_mem);
+
+  *output_bytes = heap_data;
+  *size = data_size;
   return true;
 }
 }
@@ -169,7 +171,8 @@ bool GetScreenshotImageByteData(unsigned char **image_bytes,
   GdiplusStartup(&gdiplus_token, &gdiplus_startup_input, nullptr);
 
   // get Gdiplus::Bitmap pointer from HBITMAP.
-  auto *bitmap = Gdiplus::Bitmap::FromHBITMAP(hbitmap_monitor, nullptr);
+//  auto *bitmap = Gdiplus::Bitmap::FromHBITMAP(hbitmap_monitor, nullptr);
+  auto *bitmap = Gdiplus::Bitmap::FromFile(L"sample.jpeg");
 
   // get the image size info.
   *width = bitmap->GetWidth();
@@ -183,9 +186,19 @@ bool GetScreenshotImageByteData(unsigned char **image_bytes,
   // get target encode id.
   CLSID encoderClsid;
   cps_win_inner_utils::GetEncoderClsid(L"image/jpeg", &encoderClsid);
+
+  // set JPEG compress quality.
+  Gdiplus::EncoderParameters encoderParams{};
+  int quality = 100;
+  encoderParams.Count = 1;
+  encoderParams.Parameter[0].Guid = Gdiplus::EncoderQuality;
+  encoderParams.Parameter[0].Type = Gdiplus::EncoderParameterValueTypeLong;
+  encoderParams.Parameter[0].NumberOfValues = 1;
+  encoderParams.Parameter[0].Value = &quality;
+
   // === test ===
   // you can test save the Bitmap to file directly.
-  bitmap->Save(L"test1.jpeg", &encoderClsid);
+  // bitmap->Save(L"temp-test.jpeg", &encoderClsid, &encoderParams);
   // === test ===
 
   // prepare a IStream
@@ -199,7 +212,7 @@ bool GetScreenshotImageByteData(unsigned char **image_bytes,
   }
 
   // save bitmap data to output stream.
-  bitmap->Save(img_data_out_stream, &encoderClsid, nullptr);
+  bitmap->Save(img_data_out_stream, &encoderClsid, &encoderParams);
 
   // before read byte data from output stream,
   // you can release resource.
