@@ -171,8 +171,8 @@ bool GetScreenshotImageByteData(unsigned char **image_bytes,
   GdiplusStartup(&gdiplus_token, &gdiplus_startup_input, nullptr);
 
   // get Gdiplus::Bitmap pointer from HBITMAP.
-//  auto *bitmap = Gdiplus::Bitmap::FromHBITMAP(hbitmap_monitor, nullptr);
-  auto *bitmap = Gdiplus::Bitmap::FromFile(L"sample.jpeg");
+  auto *bitmap = Gdiplus::Bitmap::FromHBITMAP(hbitmap_monitor, nullptr);
+//  auto *bitmap = Gdiplus::Bitmap::FromFile(L"sample.jpeg");
 
   // get the image size info.
   *width = bitmap->GetWidth();
